@@ -9,6 +9,9 @@ class MatchesSynchronizer():
 		self.mzMatchesPath = '../data/mz_data/$spiele.csv'
 		self.mzTeamsPath = '../data/mz_data/liste_mannschaften.csv'
 
+		self.hcMatchesPath = '../data/hc_data/1_Spiele.csv'
+		self.hcResultsPath = '../data/hc_data/1_Ergebnisse.csv'
+
 	def returnMzData(self):
 		matches = csv_handler.CsvHandler().read_csv(self.mzMatchesPath, 'r', 'utf-8', configDelimiter = '$')
 		teams = csv_handler.CsvHandler().read_csv(self.mzTeamsPath, 'r', 'utf-8')
@@ -74,12 +77,30 @@ class MatchesSynchronizer():
 		#print(miss_count)
 		return {'matches_with_team_ids': matches_with_team_ids, 'matches_without_team_ids': matches_without_team_ids}
 
+	def deleteHcMatchesAfter2007(self):
+		"""hc-db-table -> 1_Spiele
+		"""
+
+		matches = csv_handler.CsvHandler().read_csv(self.hcMatchesPath, 'r', 'utf-8')
+		#results = csv_handler.CsvHandler().read_csv(self.hcResultsPath, 'r', 'utf-8')
+
+		matchesBefore2008 = []
+		for match in matches:
+			try:
+				if int(match[1].split('"')[1].split('-')[0]) < 2008:
+					matchesBefore2008.append(match)
+			except:
+				continue
+
+		csv_handler.CsvHandler().create_csv(matchesBefore2008, '1_Spiele_bis_2007.csv')
+
 	def dev(self):
-		mzData = self.returnMzData()
-		mzMatches = self.getTeamIds(mzData)
-		mzMatches_with_team_ids = mzMatches['matches_with_team_ids']
-		mzMatches_without_team_ids = mzMatches['matches_without_team_ids']
-		print(len(mzMatches_without_team_ids))
+		#mzData = self.returnMzData()
+		#mzMatches = self.getTeamIds(mzData)
+		#mzMatches_with_team_ids = mzMatches['matches_with_team_ids']
+		#mzMatches_without_team_ids = mzMatches['matches_without_team_ids']
+
+		#self.deleteHcMatchesAfter2007()
 
 
 
