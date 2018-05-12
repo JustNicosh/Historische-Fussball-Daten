@@ -78,12 +78,10 @@ class MatchesSynchronizer():
 		return {'matches_with_team_ids': matches_with_team_ids, 'matches_without_team_ids': matches_without_team_ids}
 
 	def deleteHcMatchesAfter2007(self):
-		"""hc-db-table -> 1_Spiele
+		"""hc-db-table -> 1_Spiele convertion to 1_Spiele_bis_2007
 		"""
 
 		matches = csv_handler.CsvHandler().read_csv(self.hcMatchesPath, 'r', 'utf-8')
-		#results = csv_handler.CsvHandler().read_csv(self.hcResultsPath, 'r', 'utf-8')
-
 		matchesBefore2008 = []
 		for match in matches:
 			try:
@@ -94,6 +92,22 @@ class MatchesSynchronizer():
 
 		csv_handler.CsvHandler().create_csv(matchesBefore2008, '1_Spiele_bis_2007.csv')
 
+	def deleteHCResultsWithWrongTeams(self):
+		"""hc-db-table -> 1_Ergebnisse convertion to 1_Ergebnisse_Nationalteams
+		"""
+
+		results = csv_handler.CsvHandler().read_csv(self.hcResultsPath, 'r', 'utf-8')
+		teams = csv_handler.CsvHandler().read_csv(self.mzTeamsPath, 'r', 'utf-8')
+
+		allTeamIds = [team[2] for team in teams]
+		resultsWithWantedTeamIds = []
+
+		for result in results:
+			if result[2] in allTeamIds:
+				resultsWithWantedTeamIds.append(result)
+
+		csv_handler.CsvHandler().create_csv(resultsWithWantedTeamIds, '1_Ergebnisse_Nationalteams.csv')
+
 	def dev(self):
 		#mzData = self.returnMzData()
 		#mzMatches = self.getTeamIds(mzData)
@@ -101,6 +115,7 @@ class MatchesSynchronizer():
 		#mzMatches_without_team_ids = mzMatches['matches_without_team_ids']
 
 		#self.deleteHcMatchesAfter2007()
+		self.deleteHCResultsWithWrongTeams()
 
 
 
