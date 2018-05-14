@@ -9,13 +9,22 @@ class MatchesSynchronizer():
 		self.mzMatchesPath = '../data/mz_data/$spiele.csv'
 		self.mzTeamsPath = '../data/mz_data/liste_mannschaften.csv'
 
+		self.mzCleanMatchesPath = '../data/mz_data/mz_matches.csv'
+
 		self.hcMatchesPath = '../data/hc_data/1_Spiele.csv'
 		self.hcResultsPath = '../data/hc_data/1_Ergebnisse.csv'
 
 		self.hcMatchesBefore2007Path = '../data/hc_data/1_Spiele_bis_2007.csv'
 		self.hcResultsNationalteamsPath = '../data/hc_data/1_Ergebnisse_Nationalteams.csv'
 
+		self.hcMatchesBefore2007OnlyNationalteamsPath = '../data/hc_data/1_Spiele_bis_2007_Nationalteams.csv'
+		self.hcMatchesWithTeamIdsPath = '../data/hc_data/1_Spiele_mit_team_ids.csv'
+
+		self.hcCleanMatchesPath = '../data/hc_data/hc_matches.csv'
+
 	def returnMzData(self):
+		"""mz-db-table -> liste_mannschaften and spiele
+		"""
 		matches = csv_handler.CsvHandler().read_csv(self.mzMatchesPath, 'r', 'utf-8', configDelimiter = '$')
 		teams = csv_handler.CsvHandler().read_csv(self.mzTeamsPath, 'r', 'utf-8')
 
@@ -26,8 +35,17 @@ class MatchesSynchronizer():
 		teams.append(['"Schottland"', '"OTLAND"', '"43"', '"43"'])
 		teams.append(['"Chile"', '"ILE"', '"61"', '"61"'])
 		teams.append(['"Tschechien"', '"CZEC"', '"49"', '"49"'])
-		teams.append(['"Soviet Union"', '"T UNION"', '"49"', '"49"'])
-		teams.append(['"Soviet Union"', '"OVIET"', '"49"', '"49"'])
+		teams.append(['"Soviet Union"', '"T UNION"', '"52"', '"52"'])
+		teams.append(['"Soviet Union"', '"OVIET"', '"52"', '"52"'])
+		teams.append(['"Mexiko"', '"MEX"', '"139"', '"139"'])
+		teams.append(['"Costa Rica"', '"TA RICA"', '"126"', '"126"'])
+		teams.append(['"Argentinien"', '"TINA"', '"58"', '"58"'])
+		teams.append(['"Argentinien"', '"ARGENT"', '"58"', '"58"'])
+		teams.append(['"Belarus"', '"ВЕLА"', '"56"', '"56"'])
+		teams.append(['"Südkorea"', '"UTH KOREA"', '"184"', '"184"'])
+		teams.append(['"Estland"', '"ЕЅТОNІА"', '"13"', '"13"'])
+		teams.append(['"Israel"', '"RAEL"', '"24"', '"24"'])
+		teams.append(['"VA Emirate"', '"UNITED ARAB EMIRATES"', '"191"', '"191"'])
 
 		return {'matches': matches, 'teams': teams}
 
@@ -51,8 +69,8 @@ class MatchesSynchronizer():
 		#miss_count = 0
 		for match in data['matches']:
 
-			# if length of row does not match 25 columns
-			if len(match) != 25:
+			# if length of row does not match 25 columns or if match_date is missing
+			if len(match) != 25 or match[3] == '':
 				matches_without_team_ids.append(match)
 				continue
 
@@ -79,6 +97,22 @@ class MatchesSynchronizer():
 
 		#print(miss_count)
 		return {'matches_with_team_ids': matches_with_team_ids, 'matches_without_team_ids': matches_without_team_ids}
+
+	def createMzMatchesWithAndWithoutTeamIds(self):
+		"""mz-db-table -> spiele convertion to mz_matches and mz_matches_problemes
+		"""
+		mzData = self.returnMzData()
+		mzMatches = self.getTeamIds(mzData)
+		mzMatches_with_team_ids = mzMatches['matches_with_team_ids']
+		mzMatches_without_team_ids = mzMatches['matches_without_team_ids']
+
+		cleanMzMatches_with_team_ids = []
+		for match in mzMatches_with_team_ids:
+			cleanMzMatches_with_team_ids.append([match[0].split('"')[1], match[3].split('"')[1], match[25].split('"')[1], match[26].split('"')[1]])
+
+		csv_handler.CsvHandler().create_csv(cleanMzMatches_with_team_ids, 'mz_matches.csv')
+		csv_handler.CsvHandler().create_csv(mzMatches_without_team_ids, 'mz_matches_problemes.csv')
+
 
 	def deleteHcMatchesAfter2007(self):
 		"""hc-db-table -> 1_Spiele convertion to 1_Spiele_bis_2007
@@ -112,7 +146,7 @@ class MatchesSynchronizer():
 		csv_handler.CsvHandler().create_csv(resultsWithWantedTeamIds, '1_Ergebnisse_Nationalteams.csv')
 
 	def deleteHcMatchesWithWrongMatchIds(self):
-		"""hc-db-table -> 1_Spiele_bis_2007 convertion to 1_Spiele_bis_2007_Nationalteams
+		"""modified hc-db-table -> 1_Spiele_bis_2007 convertion to 1_Spiele_bis_2007_Nationalteams
 		"""
 
 		matches = csv_handler.CsvHandler().read_csv(self.hcMatchesBefore2007Path, 'r', 'utf-8')
@@ -122,31 +156,80 @@ class MatchesSynchronizer():
 		resultsWithWantedMatchIds = []
 
 		for i in range(len(matches)):
-			if i == 0 or i == 50000 or i == 150000 or i == 300000 or i == 450000:
-				print(matches[i])
 			if matches[i][0] in allMatchIds:
 				resultsWithWantedMatchIds.append(matches[i])
 
 		csv_handler.CsvHandler().create_csv(resultsWithWantedMatchIds, '1_Spiele_bis_2007_Nationalteams.csv')
 
-	def dev(self):
-		#mzData = self.returnMzData()
-		#mzMatches = self.getTeamIds(mzData)
-		#mzMatches_with_team_ids = mzMatches['matches_with_team_ids']
-		#mzMatches_without_team_ids = mzMatches['matches_without_team_ids']
+	def syncHcMatchesWithHcResults(self):
+		"""modified hc-db-table -> 1_Ergebnisse_Nationalteams and 1_Spiele_bis_2007_Nationalteams synchronisation to 1_Spiele_mit_team_ids
+		"""
 
+		matches = csv_handler.CsvHandler().read_csv(self.hcMatchesBefore2007OnlyNationalteamsPath, 'r', 'utf-8')
+		results = csv_handler.CsvHandler().read_csv(self.hcResultsNationalteamsPath, 'r', 'utf-8')
+
+		for i in range(len(matches)):
+			if i == 100 or i == 1000 or i == 10000 or i == 20000:
+				print(i)
+			for result in results:
+				if matches[i][0].split('"""""""')[1] == result[1].split('"""')[1]:
+					matches[i].append(result[2])
+
+		csv_handler.CsvHandler().create_csv(matches, '1_Spiele_mit_team_ids.csv')
+
+	def cleanHcmatchesWithTeamIds(self):
+		"""modified hc-db-table -> 1_Spiele_mit_team_ids convertion to hc_matches
+		"""
+
+		matches = csv_handler.CsvHandler().read_csv(self.hcMatchesWithTeamIdsPath, 'r', 'utf-8')
+
+		cleanMatches = []
+		for match in matches:
+			if len(match) != 13:
+				continue
+			cleanMatch = []
+			cleanMatch.append(match[0].split('"""""""""""""""')[1])
+			cleanMatch.append(match[1].split('"""""""""""""""')[1])
+			cleanMatch.append(match[11].split('"""""""')[1])
+			cleanMatch.append(match[12].split('"""""""')[1])
+			cleanMatches.append(cleanMatch)
+
+		csv_handler.CsvHandler().create_csv(cleanMatches, 'hc_matches.csv')
+
+	def syncHcWithMzMatches(self):
+		"""
+		"""
+
+		hcMatches = csv_handler.CsvHandler().read_csv(self.hcCleanMatchesPath, 'r', 'utf-8')
+		mzMatches = csv_handler.CsvHandler().read_csv(self.mzCleanMatchesPath, 'r', 'utf-8')
+
+		identifiedMatches = []
+		notIdentifiedMatches = []
+		for mzMatch in mzMatches:
+			found = False
+			mzDate = mzMatch[1].split('.')
+			modMzDate = mzDate[2] + '-' + mzDate[1] + '-' + mzDate[0]
+			for hcMatch in hcMatches:
+				if mzMatch[2] in hcMatch and mzMatch[2] in hcMatch and modMzDate in hcMatch:
+					mzMatch.append(hcMatch[0])
+					identifiedMatches.append(mzMatch)
+					found = True
+					break
+			if not found:
+				notIdentifiedMatches.append(mzMatch)
+
+		csv_handler.CsvHandler().create_csv(identifiedMatches, 'sync_matches.csv')
+		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'mz_matches_not_matching_with_hc_matches.csv')
+
+
+	def dev(self):
+		#self.createMzMatchesWithAndWithoutTeamIds()
 		#self.deleteHcMatchesAfter2007()
 		#self.deleteHCResultsWithWrongTeams()
-		self.deleteHcMatchesWithWrongMatchIds()
-
-
-
+		#self.deleteHcMatchesWithWrongMatchIds()
+		#self.syncHcMatchesWithHcResults()
+		#self.cleanHcmatchesWithTeamIds()
+		#self.syncHcWithMzMatches()
 
 if __name__ == '__main__':
 	MatchesSynchronizer().dev()
-
-
-
-# 1) -> NUR MATCH_IDS IN 1_SPIELE_BIS_2007 STEHEN LASSEN, DIE IN 1_ERGEBNISSE_NATIONALTEAMS AUFTAUCHEN
-# 2) -> DIESE DOKUMENTE ZUSAMMENFÜGEN
-# 3) -> MIT $SPIELE ABGLEICHEN UM DIE GESUCHTEN MATCH_IDS ZU ERHALTEN
