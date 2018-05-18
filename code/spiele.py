@@ -218,7 +218,7 @@ class MatchesSynchronizer():
 		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'mz_matches_not_matching_with_hc_matches.csv')
 
 
-	def dev(self):
+	def run(self):
 		#self.createMzMatchesWithAndWithoutTeamIds()
 		#self.deleteHcMatchesAfter2007()
 		#self.deleteHCResultsWithWrongTeams()
@@ -228,4 +228,4 @@ class MatchesSynchronizer():
 		self.syncHcWithMzMatches()
 
 if __name__ == '__main__':
-	MatchesSynchronizer().dev()
+	MatchesSynchronizer().run()
