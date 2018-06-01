@@ -20,12 +20,12 @@ class CsvHandler():
         csvFile.close()
         return outputList
 
-    def create_csv(self, content, path):
+    def create_csv(self, content, path, configDelimiter = ','):
         """Creates a new csv document.
         """
         inputList = content
         csvFile = open(path, 'a')
-        writer = csv.writer(csvFile)
+        writer = csv.writer(csvFile, delimiter = configDelimiter)
 
         for item in inputList:
             if type(item) == list:
