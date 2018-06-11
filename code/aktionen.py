@@ -51,8 +51,8 @@ class ActionsSynchronizer():
 		tore = csv_handler.CsvHandler().read_csv(self.mzTorePath, 'r', 'utf-8', configDelimiter = '$')
 		spielerListe = csv_handler.CsvHandler().read_csv(self.mzSpielerPath, 'r', 'utf-8', configDelimiter = '$')
 
-		spielerNamesListe1 = [spieler[-1] for spieler in spielerListe]
-		spielerNamesListe2 = [spieler[1] for spieler in spielerListe]
+		#spielerNamesListe1 = [spieler[-1] for spieler in spielerListe]
+		#spielerNamesListe2 = [spieler[1] for spieler in spielerListe]
 
 		toreWithWeltIds = []
 		toreWithoutWeltIds = []
@@ -74,19 +74,39 @@ class ActionsSynchronizer():
 				was_there_count += 1
 				found = True
 				continue
+
+
 			# Haben wir keine welt_id, aber der Spielername taucht in der Kaderliste auf?
 			# tor[4] -> welt_id (spieler) und tor[2] -> spieler name
-			elif tor[4] == '"0"' and (tor[2] in spielerNamesListe1 or tor[2] in spielerNamesListe2):
-				toreWithWeltIds.append(tor)
-				normal_found_count += 1
-				found = True
-				continue
-			elif not found:
+			#elif tor[4] == '"0"' and (tor[2] in spielerNamesListe1 or tor[2] in spielerNamesListe2):
+				#tor[4] = ##############################
+				#toreWithWeltIds.append(tor)
+				#normal_found_count += 1
+				#found = True
+				#continue
+			
+
+			# Haben wir keine welt_id, aber der Spielername taucht in der Kaderliste auf?
+			# tor[4] -> welt_id (spieler) und tor[2] -> spieler name
+			elif tor[4] == '"0"':
+				for spieler in spielerListe:
+					if tor[2] == spieler[-1] or tor[2] == spieler[1]:
+						tor[4] = spieler[5]
+						toreWithWeltIds.append(tor)
+						normal_found_count += 1
+						found = True
+						continue
+
+
+
+
+			if not found:
 				for kad in kader:
 					try:
 						# Kommt im richtigen Spiel der gleiche Vorname und der gleiche Anfangsbuchstabe des Nachnames vor?
 						# kad[1] -> spiel_id und kad[2] -> spieler name
 						if kad[1] == tor[1] and (kad[2].split(' ')[0] == tor[2].split(' ')[0] and kad[2].split(' ')[1][0] == tor[2].split(' ')[1][0]):
+							tor[4] = kad[-1]
 							toreWithWeltIds.append(tor)
 							vor_n_count += 1
 							print('..........VOR_N.............')
@@ -102,6 +122,7 @@ class ActionsSynchronizer():
 						# Kommt im richtigen Spiel der gleiche Nachname und der gleiche Anfangsbuchstabe des Vornamens vor?
 						# kad[1] -> spiel_id und kad[2] -> spieler name
 						if kad[1] == tor[1] and (kad[2].split(' ')[0][1] == tor[2].split(' ')[0][1] and kad[2].split(' ')[-1] == tor[2].split(' ')[-1]):
+							tor[4] = kad[-1]
 							toreWithWeltIds.append(tor)
 							v_nach_namen_count += 1
 							print('_________V_NACH__________')
@@ -116,6 +137,7 @@ class ActionsSynchronizer():
 					# Kommt im richtigen Spiel der gleiche Nachname vor (und die Fälle vorher trafen nicht ein)?
 					# kad[1] -> spiel_id und kad[2] -> spieler name
 					if kad[1] == tor[1] and (kad[2].split(' ')[-1] == tor[2].split(' ')[-1]) and kad[2] != '" "':
+						tor[4] = kad[-1]
 						toreWithWeltIds.append(tor)
 						nachnamen_count += 1
 						print('+++++++++NACH++++++++++')
@@ -140,7 +162,27 @@ class ActionsSynchronizer():
 		1740
 		816
 		8577
+
+
+
+		4349
+		24957
+		0
+		9620
+		911
+		11040
+
+
+
+		4349
+		24957
+		10438
+		1740
+		816
+		8577
+
 		'''
+
 
 		csv_handler.CsvHandler().create_csv(toreWithWeltIds, '$mz_tore.csv', configDelimiter = '$')
 		csv_handler.CsvHandler().create_csv(toreWithoutWeltIds, '$mz_tore_problemes.csv', configDelimiter = '$')
