@@ -10,7 +10,10 @@ class ActionsSynchronizer():
 		self.mzKaderOnlyWithWeltIdsPath = '../data/mz_data/$mz_kader.csv'
 
 		self.mzTorePath = '../data/mz_data/$tore.csv'
+		self.mzToreOnlyWithWeltIdsPath = '../data/mz_data/$mz_tore.csv'
+
 		self.mzSpielerPath = '../data/mz_data/$liste_spieler2.csv'
+		self.syncMatchesPath = '../data/sync_data/sync_matches.csv'
 
 	def syncKaderWithWeltIds(self):
 		"""
@@ -156,39 +159,60 @@ class ActionsSynchronizer():
 		print(nachnamen_count)
 		print(not_found_count)
 
-		'''
-		26620
-		10438
-		1740
-		816
-		8577
-
-
-
-		4349
-		24957
-		0
-		9620
-		911
-		11040
-
-
-
-		4349
-		24957
-		10438
-		1740
-		816
-		8577
-
-		'''
-
-
 		csv_handler.CsvHandler().create_csv(toreWithWeltIds, '$mz_tore.csv', configDelimiter = '$')
 		csv_handler.CsvHandler().create_csv(toreWithoutWeltIds, '$mz_tore_problemes.csv', configDelimiter = '$')
 
+	def syncToreWithMatchIds(self):
+		"""
+		"""
+		tore = csv_handler.CsvHandler().read_csv(self.mzToreOnlyWithWeltIdsPath, 'r', 'utf-8', configDelimiter = '$')
+		matches = csv_handler.CsvHandler().read_csv(self.syncMatchesPath, 'r', 'utf-8')
+		
+		syncTore = []
+		syncToreProblemes = []
+		for i in range(len(tore)):
+			found = False
+			for match in matches:
+				if tore[i][1].split('"')[1] == match[0]:
+					found = True
+					tore[i].append(match[-1])
+					syncTore.append(tore[i])
+					break
+			if not found:
+				syncToreProblemes.append(tore[i])
+
+		csv_handler.CsvHandler().create_csv(syncTore, '$sync_tore.csv', configDelimiter = '$')
+		csv_handler.CsvHandler().create_csv(syncToreProblemes, '$sync_tore_problemes.csv', configDelimiter = '$')
+
+	def syncKaderWithMatchIds(self):
+		"""
+		"""
+		kader = csv_handler.CsvHandler().read_csv(self.mzKaderOnlyWithWeltIdsPath, 'r', 'utf-8', configDelimiter = '$')
+		matches = csv_handler.CsvHandler().read_csv(self.syncMatchesPath, 'r', 'utf-8')
+
+		syncKader = []
+		syncKaderProblemes = []
+		for i in range(len(kader)):
+			found = False
+			if i == 50000 or i == 100000 or i == 150000:
+				print(i)
+			for match in matches:
+				if kader[i][1].split('"')[1] == match[0]:
+					found = True
+					kader[i].append(match[-1])
+					syncKader.append(kader[i])
+					break
+			if not found:
+				syncKaderProblemes.append(kader[i])
+
+		csv_handler.CsvHandler().create_csv(syncKader, '$sync_kader.csv', configDelimiter = '$')
+		csv_handler.CsvHandler().create_csv(syncKaderProblemes, '$sync_kader_problemes.csv', configDelimiter = '$')
+
 	def run(self):
-		self.syncToreWithWeltIds()
+		#self.syncKaderWithWeltIds()
+		#self.syncToreWithWeltIds()
+		#self.syncToreWithMatchIds()
+		self.syncKaderWithMatchIds()
 
 if __name__ == '__main__':
 	ActionsSynchronizer().run()
