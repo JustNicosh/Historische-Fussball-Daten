@@ -77,18 +77,6 @@ class ActionsSynchronizer():
 				was_there_count += 1
 				found = True
 				continue
-
-
-			# Haben wir keine welt_id, aber der Spielername taucht in der Kaderliste auf?
-			# tor[4] -> welt_id (spieler) und tor[2] -> spieler name
-			#elif tor[4] == '"0"' and (tor[2] in spielerNamesListe1 or tor[2] in spielerNamesListe2):
-				#tor[4] = ##############################
-				#toreWithWeltIds.append(tor)
-				#normal_found_count += 1
-				#found = True
-				#continue
-			
-
 			# Haben wir keine welt_id, aber der Spielername taucht in der Kaderliste auf?
 			# tor[4] -> welt_id (spieler) und tor[2] -> spieler name
 			elif tor[4] == '"0"':
@@ -99,10 +87,6 @@ class ActionsSynchronizer():
 						normal_found_count += 1
 						found = True
 						continue
-
-
-
-
 			if not found:
 				for kad in kader:
 					try:
