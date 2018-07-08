@@ -9,6 +9,7 @@ class MatchesSynchronizer():
 		self.mzMatchesPath = '../data/mz_data/$spiele.csv'
 		self.mzTeamsPath = '../data/mz_data/liste_mannschaften.csv'
 		self.mzCleanMatchesPath = '../data/mz_data/mz_matches.csv'
+		self.mzCleanMatchesProblemesPath = '../data/mz_data/mz_matches_problemes.csv'
 
 		self.hcMatchesPath = '../data/hc_data/1_Spiele.csv'
 		self.hcResultsPath = '../data/hc_data/1_Ergebnisse.csv'
@@ -107,7 +108,7 @@ class MatchesSynchronizer():
 			cleanMzMatches_with_team_ids.append([match[0].split('"')[1], match[3].split('"')[1], match[25].split('"')[1], match[26].split('"')[1]])
 
 		csv_handler.CsvHandler().create_csv(cleanMzMatches_with_team_ids, 'mz_matches.csv')
-		csv_handler.CsvHandler().create_csv(mzMatches_without_team_ids, 'mz_matches_problemes.csv')
+		csv_handler.CsvHandler().create_csv(mzMatches_without_team_ids, 'mz_matches_problemes.csv', configDelimiter = '$')
 
 
 	def deleteHcMatchesAfter2007(self):
@@ -217,6 +218,21 @@ class MatchesSynchronizer():
 		csv_handler.CsvHandler().create_csv(identifiedMatches, 'sync_matches.csv')
 		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'mz_matches_not_matching_with_hc_matches.csv')
 
+	def createListForHsRedaktion(self):
+		"""Liste aller nicht identifizierten Spiele (aufgrund von nicht zuzuordnenden Team-Strings) für Redaktion aufabeiten.
+		"""
+
+		mzMatchesProblemes = csv_handler.CsvHandler().read_csv(self.mzCleanMatchesProblemesPath, 'r', 'utf-8', configDelimiter = '$')
+
+		cleanerMatches = []
+		for match in mzMatchesProblemes:
+			try:
+				cleanerMatches.append([match[0], match[3], match[9], match[10]])
+			except:
+				print(len(match))
+				print(match)
+
+		csv_handler.CsvHandler().create_csv(cleanerMatches, 'redaktion_mz_matches_problemes.csv')
 
 	def run(self):
 		#self.createMzMatchesWithAndWithoutTeamIds()
@@ -225,7 +241,7 @@ class MatchesSynchronizer():
 		#self.deleteHcMatchesWithWrongMatchIds()
 		#self.syncHcMatchesWithHcResults()
 		#self.cleanHcmatchesWithTeamIds()
-		self.syncHcWithMzMatches()
+		self.createListForHsRedaktion()
 
 if __name__ == '__main__':
 	MatchesSynchronizer().run()
