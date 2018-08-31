@@ -10,6 +10,8 @@ class MatchesSynchronizer():
 		self.mzTeamsPath = '../data/mz_data/liste_mannschaften.csv'
 		self.mzCleanMatchesPath = '../data/mz_data/mz_matches.csv'
 		self.mzCleanMatchesProblemesPath = '../data/mz_data/mz_matches_problemes.csv'
+		self.mzFixedMatchesByRalfPath = '../data/mz_data/mz_matches_problemes_fixed_by_ralf.csv'
+		self.mzCompleteCleanMatchesPath = '../data/mz_data/mz_matches_complete.csv'
 
 		self.hcMatchesPath = '../data/hc_data/1_Spiele.csv'
 		self.hcResultsPath = '../data/hc_data/1_Ergebnisse.csv'
@@ -198,7 +200,7 @@ class MatchesSynchronizer():
 		"""
 
 		hcMatches = csv_handler.CsvHandler().read_csv(self.hcCleanMatchesPath, 'r', 'utf-8')
-		mzMatches = csv_handler.CsvHandler().read_csv(self.mzCleanMatchesPath, 'r', 'utf-8')
+		mzMatches = csv_handler.CsvHandler().read_csv(self.mzCompleteCleanMatchesPath, 'r', 'utf-8')
 
 		identifiedMatches = []
 		notIdentifiedMatches = []
@@ -216,7 +218,7 @@ class MatchesSynchronizer():
 				notIdentifiedMatches.append(mzMatch)
 
 		csv_handler.CsvHandler().create_csv(identifiedMatches, 'sync_matches.csv')
-		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'mz_matches_not_matching_with_hc_matches.csv')
+		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'sync_matches_problemes.csv')
 
 	def createListForHsRedaktion(self):
 		"""Liste aller nicht identifizierten Spiele (aufgrund von nicht zuzuordnenden Team-Strings) für Redaktion aufabeiten.
@@ -234,6 +236,27 @@ class MatchesSynchronizer():
 
 		csv_handler.CsvHandler().create_csv(cleanerMatches, 'redaktion_mz_matches_problemes.csv')
 
+	def combineMzMatchesWithListByRalf(self):
+		"""mz_matches und mz_matches_problemes_fixed_by_ralf zu neuem mz_matches_complete kombinieren
+		"""
+
+		mzMatches = csv_handler.CsvHandler().read_csv(self.mzCleanMatchesPath, 'r', 'utf-8')
+		mzFixedMatchesByRalf = csv_handler.CsvHandler().read_csv(self.mzFixedMatchesByRalfPath, 'r', 'utf-8')
+
+		allMatches = []
+		for fixedMatch in mzFixedMatchesByRalf:
+			# check if some information (like the date or one team_id) is missing
+			# delete both team names
+			if '' not in fixedMatch:
+				del fixedMatch[2]
+				del fixedMatch[2]
+				allMatches.append(fixedMatch)
+
+		for match in mzMatches:
+			allMatches.append(match)
+
+		csv_handler.CsvHandler().create_csv(allMatches, 'mz_matches_complete.csv')
+
 	def run(self):
 		#self.createMzMatchesWithAndWithoutTeamIds()
 		#self.deleteHcMatchesAfter2007()
@@ -241,7 +264,9 @@ class MatchesSynchronizer():
 		#self.deleteHcMatchesWithWrongMatchIds()
 		#self.syncHcMatchesWithHcResults()
 		#self.cleanHcmatchesWithTeamIds()
-		self.createListForHsRedaktion()
+		self.syncHcWithMzMatches()
+		#self.createListForHsRedaktion()
+		#self.combineMzMatchesWithListByRalf()
 
 if __name__ == '__main__':
 	MatchesSynchronizer().run()
