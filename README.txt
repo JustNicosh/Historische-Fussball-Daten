@@ -72,8 +72,6 @@ Grund der Probleme: Matches, welche nicht zugeordnet werden konnten und sich in 
 
 ToDo
 
-1) In sync_matches nach doppelten Spielen schauen!
-
-2) Mit aktuellem sync_matches aktuelle Versionen von sync_tore und sync_kader erstellen
+-> Mit aktuellem sync_matches aktuelle Versionen von sync_tore und sync_kader erstellen
 
 

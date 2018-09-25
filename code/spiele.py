@@ -220,7 +220,7 @@ class MatchesSynchronizer():
 		csv_handler.CsvHandler().create_csv(identifiedMatches, 'sync_matches.csv')
 		csv_handler.CsvHandler().create_csv(notIdentifiedMatches, 'sync_matches_problemes.csv')
 
-	def createListForHsRedaktion(self):
+	def createMzMatchesProblemesListForHsRedaktion(self):
 		"""Liste aller nicht identifizierten Spiele (aufgrund von nicht zuzuordnenden Team-Strings) für Redaktion aufabeiten.
 		"""
 
@@ -264,8 +264,8 @@ class MatchesSynchronizer():
 		#self.deleteHcMatchesWithWrongMatchIds()
 		#self.syncHcMatchesWithHcResults()
 		#self.cleanHcmatchesWithTeamIds()
-		self.syncHcWithMzMatches()
-		#self.createListForHsRedaktion()
+		#self.syncHcWithMzMatches()
+		#self.createMzMatchesProblemesListForHsRedaktion()
 		#self.combineMzMatchesWithListByRalf()
 
 if __name__ == '__main__':

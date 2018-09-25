@@ -11,6 +11,7 @@ class ActionsSynchronizer():
 
 		self.mzTorePath = '../data/mz_data/$tore.csv'
 		self.mzToreOnlyWithWeltIdsPath = '../data/mz_data/$mz_tore.csv'
+		self.mzToreOnlyWithoutWeltIdsPath = '../data/mz_data/$mz_tore_problemes.csv'
 
 		self.mzSpielerPath = '../data/mz_data/$liste_spieler2.csv'
 		self.syncMatchesPath = '../data/sync_data/sync_matches.csv'
@@ -156,6 +157,8 @@ class ActionsSynchronizer():
 		syncToreProblemes = []
 		for i in range(len(tore)):
 			found = False
+			if i == 10000 or i == 20000 or i == 30000:
+				print(i)
 			for match in matches:
 				if tore[i][1].split('"')[1] == match[0]:
 					found = True
@@ -178,7 +181,7 @@ class ActionsSynchronizer():
 		syncKaderProblemes = []
 		for i in range(len(kader)):
 			found = False
-			if i == 50000 or i == 100000 or i == 150000:
+			if i == 50000 or i == 100000 or i == 150000 or i == 200000 or i == 250000:
 				print(i)
 			for match in matches:
 				if kader[i][1].split('"')[1] == match[0]:
@@ -192,11 +195,30 @@ class ActionsSynchronizer():
 		csv_handler.CsvHandler().create_csv(syncKader, '$sync_kader.csv', configDelimiter = '$')
 		csv_handler.CsvHandler().create_csv(syncKaderProblemes, '$sync_kader_problemes.csv', configDelimiter = '$')
 
+	def createMzToreProblemesListForRedaktion(self):
+		"""
+		"""
+		mzProblemeTore = csv_handler.CsvHandler().read_csv(self.mzToreOnlyWithoutWeltIdsPath, 'r', 'utf-8', configDelimiter = '$')
+		syncMatches = csv_handler.CsvHandler().read_csv(self.syncMatchesPath, 'r', 'utf-8')
+		
+		##allSyncMatchesMzMatchIds = []
+		#for syncMatch in syncMatches:
+			#allSyncMatchesMzMatchIds.append(syncMatch[0])
+
+		allMzProblemeToreWithPresentMzMatchIds = []
+		for mzProblemeTor in mzProblemeTore:
+			for syncMatch in syncMatches:
+				if mzProblemeTor[1][1:-1] == syncMatch[0]:
+					allMzProblemeToreWithPresentMzMatchIds.append(syncMatch + mzProblemeTor)
+
+		csv_handler.CsvHandler().create_csv(allMzProblemeToreWithPresentMzMatchIds, '$mz_tore_problemes_without_unvalid_mz_match_ids.csv', configDelimiter = ',')
+
 	def run(self):
 		#self.syncKaderWithWeltIds()
 		#self.syncToreWithWeltIds()
 		#self.syncToreWithMatchIds()
-		self.syncKaderWithMatchIds()
+		#self.syncKaderWithMatchIds()
+		self.createMzToreProblemesListForRedaktion()
 
 if __name__ == '__main__':
 	ActionsSynchronizer().run()
