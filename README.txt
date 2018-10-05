@@ -1,6 +1,9 @@
 ﻿Historische Fussballdaten – Readme
+##################################
+
 
 Datenlage
+---------
 
 Inhalt der MZ-DB:
 kader_rohdaten
@@ -13,7 +16,9 @@ Benötigte Tabellen aus der HC-DB:
 1_Spiele
 1_Ergebnisse
 
+
 Vorgehen
+--------
 
 1) Spiele
 
@@ -70,8 +75,15 @@ Zeilen (verschiedene Toreinträge) in  sync_tore_problemes: 11.959
 Grund der Probleme: Matches, welche nicht zugeordnet werden konnten und sich in sync_matches_problemes befinden, tauchen nicht in sync_matches auf (Bsp.:  Albanien – Montenegro vom  22.08.1946, s.o.) + Viele Matches, welche mit einer MZ-internen spiel_id in tore_rohdaten (und damit auch in mz_tore) gelistet werden, tauchen nicht in spiele_rohdaten (und damit auch nicht in mz_matches und sync_matches) auf
 
 
-ToDo
+ToDo (05.10.2018)
+-----------------
 
--> Mit aktuellem sync_matches aktuelle Versionen von sync_tore und sync_kader erstellen
+-> Auf Mark warten, Matching-Tool-php-Code-Änderung wird mir geschickt
+-> Diese auf endstand unter ../fabian/ einbauen
+-> Parser bauen, der alle unten stehenden Links klickt (rote Namen matchen)
+
+-> Auf Ralf warten, er bespricht sich mit Saban
+-> Klicke ich (s.o.) auf die Links aller land_ids?
+-> Wo genau kann ich das Tool überhaupt ansurfen?
 
 
