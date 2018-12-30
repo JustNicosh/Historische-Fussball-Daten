@@ -10,7 +10,11 @@ class CsvHandler():
     def read_csv(self, path, configFormat = 'rb', configEncoding = 'utf-8', configDelimiter = ',', configQuotechar = '|', pythonVersion = '3'):
         """Returns the content of a csv document.
         """
-        csvFile = open(path, configFormat, encoding = configEncoding)
+        if pythonVersion == '3':
+            csvFile = open(path, configFormat, encoding = configEncoding)
+        else:
+            csvFile = open(path, configFormat)
+
         reader = csv.reader(csvFile, delimiter = configDelimiter, quotechar = configQuotechar)
 
         outputList = []
