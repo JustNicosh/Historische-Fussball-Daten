@@ -29,8 +29,8 @@ class FabianParser():
 		# Loop durch alle Laender (bis inkl. Chile), Datei-Infos pro Land in Liste speichern
 		for i in range(1, 62):
 
-			# Bolivien rauslassen
-			if (i == 59):
+			# Oesterreich, Deutschland, DDR, Niederlande und Bolivien rauslassen
+			if i == 4 or i == 20 or i == 21 or i == 23 or i == 59:
 				continue
 
 			webContent = self.returnWebContent(self.buchParserUrl + '?land=' + str(i))['content']
@@ -55,4 +55,5 @@ class FabianParser():
 
 
 if __name__ == '__main__':
+	#FabianParser().writeAllDateiIdsForAllCountriesIntoCsv()
 	FabianParser().test()
