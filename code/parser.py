@@ -5,7 +5,10 @@ import urllib2
 import bs4
 import csv_handler
 
-class FabianParser():
+class FabianParserModifier():
+	"""Automatismus, um im Editor (Buch-Parser von Fabian) alle noch nicht zugeordneten Spieler (Kadereintraege und Torschuetzen) mit dem wahrscheinlichsten Treffer zu matchen.
+		-> http://prj.endstand.de/fabian/buch-parser/dbeditor.php
+	"""
 
 	def __init__(self):
 		self.buchParserUrl = 'http://prj.endstand.de/fabian/buch-parser/dbeditor.php'
@@ -22,7 +25,7 @@ class FabianParser():
 			response = urllib2.urlopen(request)
 			return {'content': bs4.BeautifulSoup(response, 'html.parser'), 'failed': False}
 		except:
-			print 'Error: Could not open ' + url
+			print('Error: Could not open ' + url)
 			return {'failed': True}
 	
 	def writeAllDateiIdsForAllCountriesIntoCsv(self):
@@ -45,15 +48,28 @@ class FabianParser():
 			csv_handler.CsvHandler().create_csv([allDateien], 'alle_dateien.csv')
 		return allDateien
 
-	def test(self):
-
-		#dateienListe = csv_handler.CsvReaderForPython2('../data/parser_data/alle_dateien.csv').read_csv()
+	def clickAllReadyLinks(self):
 		dateienListe = csv_handler.CsvHandler().read_csv('../data/parser_data/alle_dateien.csv', pythonVersion = '2')
-
-		print(dateienListe)
 		
+		# Loop durch alle Laender (countryId steht jeweils an erster Stelle)
+		for k in range(6,10): #range(0,5): #range(5,10): #range(10,15): #len(dateienListe)):
+			countryId = dateienListe[k][0]
+			print('________________________________')
+			print('countryId=' + countryId)
+			landLinkPart = self.buchParserUrl + '?land=' + countryId
+			
+			# Loop durch alle Dateien, fuer welche jeweils Kadereintraege und Torschuetzen kompletiert werden muessen
+			for i in range(1,len(dateienListe[k])):
+				dateiId = dateienListe[k][i]
+				print('dateiId=' + dateiId)
+				dateiLinkPart = '&datei=' + dateiId
+				kaderLink = landLinkPart + dateiLinkPart + '&bereich=kader&ready=1'
+				toreLink = landLinkPart + dateiLinkPart + '&bereich=tore&ready=1'
+				webContent = self.returnWebContent(kaderLink)
+				webContent = self.returnWebContent(toreLink)
+		return True
 
 
 if __name__ == '__main__':
-	#FabianParser().writeAllDateiIdsForAllCountriesIntoCsv()
-	FabianParser().test()
+	#FabianParserModifier().writeAllDateiIdsForAllCountriesIntoCsv()
+	FabianParserModifier().clickAllReadyLinks()
