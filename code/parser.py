@@ -52,7 +52,7 @@ class FabianParserModifier():
 		dateienListe = csv_handler.CsvHandler().read_csv('../data/parser_data/alle_dateien.csv', pythonVersion = '2')
 		
 		# Loop durch alle Laender (countryId steht jeweils an erster Stelle)
-		for k in range(6,10): #range(0,5): #range(5,10): #range(10,15): #len(dateienListe)):
+		for k in range(55,len(dateienListe)): #range(0,5): #range(5,10): #range(10,15): #len(dateienListe)):
 			countryId = dateienListe[k][0]
 			print('________________________________')
 			print('countryId=' + countryId)

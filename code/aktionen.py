@@ -162,8 +162,16 @@ class ActionsSynchronizer():
 			for match in matches:
 				if tore[i][1].split('"')[1] == match[0]:
 					found = True
-					tore[i].append(match[-1])
-					syncTore.append(tore[i])
+
+					# Elfmeter sind mit einem 'p' hinter der min gekennzeichnet
+					# Bekommen bei uns in der Tabelle '1_Aktionen' die art '1'
+					art = '0'
+					if 'p' in tore[i][3]:
+						art = '1'
+
+					# matchId, personId, aktion, art, minute
+					syncTore.append([match[-1], tore[i][4], '1', art, tore[i][3]])
+
 					break
 			if not found:
 				syncToreProblemes.append(tore[i])
@@ -183,18 +191,39 @@ class ActionsSynchronizer():
 			found = False
 			if i == 50000 or i == 100000 or i == 150000 or i == 200000 or i == 250000:
 				print(i)
+
+			#if len(kader[i]) < 10:
+				#print(kader[i])
+			
 			for match in matches:
 				if kader[i][1].split('"')[1] == match[0]:
 					found = True
-					kader[i].append(match[-1])
-					syncKader.append(kader[i])
+
+					# matchId, personId, aktion, art, minute
+
+					# Startaufstellung (alle vorkommenden, die nicht eingewechselt wurden)
+					if kader[i][4] == '"0"':
+						syncKader.append([match[-1], kader[i][-1], '0', '0', ''])
+
+					# Einwechslung
+					if kader[i][4] != '"0"':
+						syncKader.append([match[-1], kader[i][-1], '0', '1', kader[i][6]])
+
+					# Auswechslung (alle die raus kamen, aber keinen Platzverweis erhielten)
+					if kader[i][5] != '"0"' and kader[i][8] == '"0"':
+						syncKader.append([match[-1], kader[i][-1], '0', '2', kader[i][7]])
+
+					# Platzverweis (wir gehen im Bezug auf art von einer glatt roten Karte aus)
+					if kader[i][8] != '"0"':
+						syncKader.append([match[-1], kader[i][-1], '2', '2', kader[i][7]])
+
 					break
 			if not found:
 				syncKaderProblemes.append(kader[i])
 
 		csv_handler.CsvHandler().create_csv(syncKader, '$sync_kader.csv', configDelimiter = '$')
 		csv_handler.CsvHandler().create_csv(syncKaderProblemes, '$sync_kader_problemes.csv', configDelimiter = '$')
-
+		
 	def createMzToreProblemesListForRedaktion(self):
 		"""
 		"""
@@ -217,8 +246,8 @@ class ActionsSynchronizer():
 		#self.syncKaderWithWeltIds()
 		#self.syncToreWithWeltIds()
 		#self.syncToreWithMatchIds()
-		#self.syncKaderWithMatchIds()
-		self.createMzToreProblemesListForRedaktion()
+		self.syncKaderWithMatchIds()
+		#self.createMzToreProblemesListForRedaktion()
 
 if __name__ == '__main__':
 	ActionsSynchronizer().run()
