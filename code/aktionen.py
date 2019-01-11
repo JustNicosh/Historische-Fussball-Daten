@@ -169,8 +169,8 @@ class ActionsSynchronizer():
 					if 'p' in tore[i][3]:
 						art = '1'
 
-					# matchId, personId, aktion, art, minute
-					syncTore.append([match[-1], tore[i][4], '1', art, tore[i][3]])
+					# matchId, teamId1, teamId2, personId, aktion, art, minute
+					syncTore.append([match[-1], match[2], match[3], tore[i][4], '1', art, tore[i][3]])
 
 					break
 			if not found:
@@ -199,23 +199,23 @@ class ActionsSynchronizer():
 				if kader[i][1].split('"')[1] == match[0]:
 					found = True
 
-					# matchId, personId, aktion, art, minute
+					# matchId, teamId1, teamId2, personId, aktion, art, minute
 
 					# Startaufstellung (alle vorkommenden, die nicht eingewechselt wurden)
 					if kader[i][4] == '"0"':
-						syncKader.append([match[-1], kader[i][-1], '0', '0', ''])
+						syncKader.append([match[-1], match[2], match[3], kader[i][-1], '0', '0', ''])
 
 					# Einwechslung
 					if kader[i][4] != '"0"':
-						syncKader.append([match[-1], kader[i][-1], '0', '1', kader[i][6]])
+						syncKader.append([match[-1], match[2], match[3], kader[i][-1], '0', '1', kader[i][6]])
 
 					# Auswechslung (alle die raus kamen, aber keinen Platzverweis erhielten)
 					if kader[i][5] != '"0"' and kader[i][8] == '"0"':
-						syncKader.append([match[-1], kader[i][-1], '0', '2', kader[i][7]])
+						syncKader.append([match[-1], match[2], match[3], kader[i][-1], '0', '2', kader[i][7]])
 
 					# Platzverweis (wir gehen im Bezug auf art von einer glatt roten Karte aus)
 					if kader[i][8] != '"0"':
-						syncKader.append([match[-1], kader[i][-1], '2', '2', kader[i][7]])
+						syncKader.append([match[-1], match[2], match[3], kader[i][-1], '2', '2', kader[i][7]])
 
 					break
 			if not found:
